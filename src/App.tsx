@@ -139,14 +139,14 @@ export default function App() {
               <div>
                 <h3 className="mb-4">Liên hệ</h3>
                 <ul className="space-y-2 text-sm text-gray-400">
-                  <li>Hotline: 1900 6467</li>
-                  <li>Email: support@vexeviet.com</li>
+                  <li>Hotline: 079 9076 901</li>
+                  <li>Email: support@hongducct.id.vn</li>
                   <li>Giờ làm việc: 24/7</li>
                 </ul>
               </div>
             </div>
             <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-              © 2025 VeXeViet. All rights reserved.
+              © 2025 Hong Duc CT. All rights reserved.
             </div>
           </div>
         </footer>
