@@ -1,0 +1,44 @@
+{
+  "common": {
+    "home": "Trang chủ",
+    "search": "Tìm kiếm",
+    "orders": "Đơn hàng",
+    "tracking": "Tra cứu",
+    "login": "Đăng nhập",
+    "register": "Đăng ký",
+    "logout": "Đăng xuất",
+    "profile": "Hồ sơ",
+    "admin": "Quản trị",
+    "language": "Ngôn ngữ",
+    "theme": "Giao diện",
+    "light": "Sáng",
+    "dark": "Tối",
+    "system": "Hệ thống"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Mật khẩu",
+    "name": "Họ tên",
+    "phone": "Số điện thoại",
+    "loginTitle": "Đăng nhập",
+    "registerTitle": "Đăng ký",
+    "forgotPassword": "Quên mật khẩu?",
+    "noAccount": "Chưa có tài khoản?",
+    "hasAccount": "Đã có tài khoản?",
+    "loginSuccess": "Đăng nhập thành công",
+    "registerSuccess": "Đăng ký thành công",
+    "loginFailed": "Đăng nhập thất bại",
+    "registerFailed": "Đăng ký thất bại"
+  },
+  "booking": {
+    "from": "Điểm đi",
+    "to": "Điểm đến",
+    "date": "Ngày đi",
+    "passengers": "Số hành khách",
+    "search": "Tìm chuyến xe",
+    "selectSeats": "Chọn ghế",
+    "checkout": "Thanh toán",
+    "success": "Đặt vé thành công"
+  }
+}
+

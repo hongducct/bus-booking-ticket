@@ -246,7 +246,7 @@ export function TrackingPage() {
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-gray-600">Email:</span>
-                <span className="text-blue-600">support@vexeviet.com</span>
+                <span className="text-blue-600">support@hongducct.id.vn</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-gray-600">Giờ làm việc:</span>

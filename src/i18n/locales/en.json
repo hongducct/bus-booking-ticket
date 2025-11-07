@@ -1,0 +1,44 @@
+{
+  "common": {
+    "home": "Home",
+    "search": "Search",
+    "orders": "Orders",
+    "tracking": "Tracking",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "profile": "Profile",
+    "admin": "Admin",
+    "language": "Language",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "name": "Full Name",
+    "phone": "Phone Number",
+    "loginTitle": "Login",
+    "registerTitle": "Register",
+    "forgotPassword": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "loginSuccess": "Login successful",
+    "registerSuccess": "Registration successful",
+    "loginFailed": "Login failed",
+    "registerFailed": "Registration failed"
+  },
+  "booking": {
+    "from": "From",
+    "to": "To",
+    "date": "Date",
+    "passengers": "Passengers",
+    "search": "Search Trips",
+    "selectSeats": "Select Seats",
+    "checkout": "Checkout",
+    "success": "Booking successful"
+  }
+}
+
