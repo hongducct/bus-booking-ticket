@@ -4,28 +4,26 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { Search, MapPin, Calendar, Users, CheckCircle, Clock, Package } from 'lucide-react';
+import { searchBooking } from '../utils/api';
 
 export function TrackingPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResult, setSearchResult] = useState<any>(null);
   const [isSearching, setIsSearching] = useState(false);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+    
     setIsSearching(true);
-
-    // Simulate search from localStorage
-    setTimeout(() => {
-      const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-      const found = orders.find(
-        (order: any) =>
-          order.orderId === searchQuery ||
-          order.customerInfo.phone === searchQuery ||
-          order.customerInfo.email === searchQuery
-      );
-
-      setSearchResult(found || null);
+    try {
+      const result = await searchBooking(searchQuery);
+      setSearchResult(result);
+    } catch (error: any) {
+      console.error('Error searching booking:', error);
+      setSearchResult(null);
+    } finally {
       setIsSearching(false);
-    }, 1000);
+    }
   };
 
   const getStatusInfo = (status: string) => {
@@ -123,81 +121,93 @@ export function TrackingPage() {
                 <div className="space-y-3">
                   <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                     <span className="text-gray-600">Mã đơn hàng</span>
-                    <span className="text-blue-600">{searchResult.orderId}</span>
+                    <span className="text-blue-600">{searchResult.orderId || searchResult.id || 'N/A'}</span>
                   </div>
                   <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                     <span className="text-gray-600">Ngày đặt</span>
-                    <span>{new Date(searchResult.bookingDate).toLocaleString('vi-VN')}</span>
+                    <span>
+                      {searchResult.bookingDate 
+                        ? new Date(searchResult.bookingDate).toLocaleString('vi-VN')
+                        : 'N/A'}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                     <span className="text-gray-600">Tổng tiền</span>
                     <span className="text-orange-500 text-xl">
-                      {searchResult.totalPrice.toLocaleString('vi-VN')}đ
+                      {(searchResult.totalPrice || 0).toLocaleString('vi-VN')}đ
                     </span>
                   </div>
                 </div>
               </div>
 
               {/* Trip Details */}
-              <div>
-                <h3 className="text-xl mb-4">Thông tin chuyến đi</h3>
-                <div className="space-y-3">
-                  <div className="p-4 bg-gradient-to-r from-blue-50 to-orange-50 rounded-lg">
-                    <div className="text-gray-600 text-sm mb-2">Nhà xe</div>
-                    <div className="text-lg">{searchResult.trip.company}</div>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                    <MapPin className="w-5 h-5 text-orange-500 mt-1" />
-                    <div className="flex-1">
-                      <div className="text-gray-600 text-sm mb-1">Tuyến đường</div>
-                      <div>
-                        {searchResult.trip.from} → {searchResult.trip.to}
+              {searchResult.trip && (
+                <div>
+                  <h3 className="text-xl mb-4">Thông tin chuyến đi</h3>
+                  <div className="space-y-3">
+                    <div className="p-4 bg-gradient-to-r from-blue-50 to-orange-50 rounded-lg">
+                      <div className="text-gray-600 text-sm mb-2">Nhà xe</div>
+                      <div className="text-lg">{searchResult.trip.company || 'Nhà xe'}</div>
+                    </div>
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                      <MapPin className="w-5 h-5 text-orange-500 mt-1" />
+                      <div className="flex-1">
+                        <div className="text-gray-600 text-sm mb-1">Tuyến đường</div>
+                        <div>
+                          {searchResult.trip.from || ''} → {searchResult.trip.to || ''}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                    <Calendar className="w-5 h-5 text-blue-600 mt-1" />
-                    <div className="flex-1">
-                      <div className="text-gray-600 text-sm mb-1">Thời gian</div>
-                      <div>{searchResult.trip.departureTime}</div>
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                      <Calendar className="w-5 h-5 text-blue-600 mt-1" />
+                      <div className="flex-1">
+                        <div className="text-gray-600 text-sm mb-1">Thời gian</div>
+                        <div>{searchResult.trip.departureTime || 'N/A'}</div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                    <Users className="w-5 h-5 text-orange-500 mt-1" />
-                    <div className="flex-1">
-                      <div className="text-gray-600 text-sm mb-1">Ghế đã đặt</div>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {searchResult.seats.map((seat: any) => (
-                          <Badge key={seat.id} variant="secondary">
-                            {seat.number}
-                          </Badge>
-                        ))}
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                      <Users className="w-5 h-5 text-orange-500 mt-1" />
+                      <div className="flex-1">
+                        <div className="text-gray-600 text-sm mb-1">Ghế đã đặt</div>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {searchResult.seats && searchResult.seats.length > 0 ? (
+                            searchResult.seats.map((seat: any) => (
+                              <Badge key={seat.id || seat.number} variant="secondary">
+                                {seat.number || seat.seatNumber || 'N/A'}
+                              </Badge>
+                            ))
+                          ) : (
+                            <span className="text-gray-500 text-sm">Chưa có thông tin ghế</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Customer Info */}
-              <div>
-                <h3 className="text-xl mb-4">Thông tin khách hàng</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span className="text-gray-600">Họ tên</span>
-                    <span>{searchResult.customerInfo.name}</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span className="text-gray-600">Số điện thoại</span>
-                    <span>{searchResult.customerInfo.phone}</span>
-                  </div>
-                  {searchResult.customerInfo.email && (
+              {searchResult.customerInfo && (
+                <div>
+                  <h3 className="text-xl mb-4">Thông tin khách hàng</h3>
+                  <div className="space-y-3">
                     <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                      <span className="text-gray-600">Email</span>
-                      <span>{searchResult.customerInfo.email}</span>
+                      <span className="text-gray-600">Họ tên</span>
+                      <span>{searchResult.customerInfo.name || 'N/A'}</span>
                     </div>
-                  )}
+                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                      <span className="text-gray-600">Số điện thoại</span>
+                      <span>{searchResult.customerInfo.phone || 'N/A'}</span>
+                    </div>
+                    {searchResult.customerInfo.email && (
+                      <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <span className="text-gray-600">Email</span>
+                        <span>{searchResult.customerInfo.email}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Actions */}
               <div className="flex gap-3 pt-4">
