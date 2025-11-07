@@ -14,8 +14,11 @@ import {
   SlidersHorizontal,
   Bed,
   Armchair,
-  X
+  X,
+  Loader2
 } from 'lucide-react';
+import { searchTrips } from '../utils/api';
+import { toast } from 'sonner';
 
 interface Trip {
   id: string;
@@ -33,105 +36,13 @@ interface Trip {
   amenities: string[];
 }
 
-const mockTrips: Trip[] = [
-  {
-    id: '1',
-    company: 'BX Nam Nghĩa - Quảng Bình',
-    companyRating: 4.8,
-    from: 'Hồ Chí Minh',
-    to: 'Đà Lạt',
-    departureTime: '08:00',
-    arrivalTime: '14:40',
-    duration: '6h 40p',
-    price: 250000,
-    busType: 'sleeper',
-    availableSeats: 28,
-    totalSeats: 36,
-    amenities: ['Wifi', 'Nước uống', 'Điều hòa', 'Giường nằm'],
-  },
-  {
-    id: '2',
-    company: 'Phương Trang - FUTA Bus Lines',
-    companyRating: 4.9,
-    from: 'Hồ Chí Minh',
-    to: 'Đà Lạt',
-    departureTime: '09:30',
-    arrivalTime: '16:00',
-    duration: '6h 30p',
-    price: 280000,
-    busType: 'limousine',
-    availableSeats: 15,
-    totalSeats: 18,
-    amenities: ['Wifi', 'Nước uống', 'Điều hòa', 'Limousine', 'Massage'],
-  },
-  {
-    id: '3',
-    company: 'Thành Bưởi',
-    companyRating: 4.7,
-    from: 'Hồ Chí Minh',
-    to: 'Đà Lạt',
-    departureTime: '11:00',
-    arrivalTime: '17:30',
-    duration: '6h 30p',
-    price: 230000,
-    busType: 'seat',
-    availableSeats: 35,
-    totalSeats: 40,
-    amenities: ['Wifi', 'Nước uống', 'Điều hòa'],
-  },
-  {
-    id: '4',
-    company: 'Mai Linh Express',
-    companyRating: 4.6,
-    from: 'Hồ Chí Minh',
-    to: 'Đà Lạt',
-    departureTime: '13:00',
-    arrivalTime: '19:40',
-    duration: '6h 40p',
-    price: 260000,
-    busType: 'sleeper',
-    availableSeats: 22,
-    totalSeats: 36,
-    amenities: ['Wifi', 'Nước uống', 'Điều hòa', 'Giường nằm'],
-  },
-  {
-    id: '5',
-    company: 'Hà Linh',
-    companyRating: 4.5,
-    from: 'Hồ Chí Minh',
-    to: 'Đà Lạt',
-    departureTime: '15:30',
-    arrivalTime: '22:00',
-    duration: '6h 30p',
-    price: 240000,
-    busType: 'seat',
-    availableSeats: 30,
-    totalSeats: 40,
-    amenities: ['Wifi', 'Nước uống', 'Điều hòa'],
-  },
-  {
-    id: '6',
-    company: 'Kumho Samco',
-    companyRating: 4.8,
-    from: 'Hồ Chí Minh',
-    to: 'Đà Lạt',
-    departureTime: '17:00',
-    arrivalTime: '23:30',
-    duration: '6h 30p',
-    price: 270000,
-    busType: 'limousine',
-    availableSeats: 12,
-    totalSeats: 18,
-    amenities: ['Wifi', 'Nước uống', 'Điều hòa', 'Limousine', 'Massage'],
-  },
-];
-
 export function SearchResultsPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [trips, setTrips] = useState<Trip[]>(mockTrips);
-  const [filteredTrips, setFilteredTrips] = useState<Trip[]>(mockTrips);
+  const [trips, setTrips] = useState<Trip[]>([]);
+  const [filteredTrips, setFilteredTrips] = useState<Trip[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Filter states
   const [priceRange, setPriceRange] = useState([200000, 300000]);
@@ -143,50 +54,61 @@ export function SearchResultsPage() {
   const to = searchParams.get('to') || 'Đà Lạt';
   const date = searchParams.get('date') || new Date().toISOString().split('T')[0];
 
+  // Load trips from API
   useEffect(() => {
-    applyFilters();
-  }, [priceRange, selectedBusTypes, selectedTimeSlots, sortBy]);
-
-  const applyFilters = () => {
-    let filtered = [...trips];
-
-    // Price filter
-    filtered = filtered.filter(
-      (trip) => trip.price >= priceRange[0] && trip.price <= priceRange[1]
-    );
-
-    // Bus type filter
-    if (selectedBusTypes.length > 0) {
-      filtered = filtered.filter((trip) => selectedBusTypes.includes(trip.busType));
-    }
-
-    // Time slot filter
-    if (selectedTimeSlots.length > 0) {
-      filtered = filtered.filter((trip) => {
-        const hour = parseInt(trip.departureTime.split(':')[0]);
-        return selectedTimeSlots.some((slot) => {
-          if (slot === 'morning') return hour >= 6 && hour < 12;
-          if (slot === 'afternoon') return hour >= 12 && hour < 18;
-          if (slot === 'evening') return hour >= 18 || hour < 6;
-          return false;
+    const loadTrips = async () => {
+      setLoading(true);
+      try {
+        const results = await searchTrips({
+          from,
+          to,
+          date,
+          passengers: parseInt(searchParams.get('passengers') || '1'),
+          minPrice: priceRange[0],
+          maxPrice: priceRange[1],
+          busType: selectedBusTypes.length === 1 ? selectedBusTypes[0] : undefined,
+          timeSlot: selectedTimeSlots.length === 1 ? selectedTimeSlots[0] : undefined,
+          sortBy,
         });
-      });
-    }
-
-    // Sort
-    filtered.sort((a, b) => {
-      if (sortBy === 'price') return a.price - b.price;
-      if (sortBy === 'rating') return b.companyRating - a.companyRating;
-      if (sortBy === 'time') {
-        const timeA = parseInt(a.departureTime.replace(':', ''));
-        const timeB = parseInt(b.departureTime.replace(':', ''));
-        return timeA - timeB;
+        setTrips(results);
+        setFilteredTrips(results);
+      } catch (error: any) {
+        console.error('Error loading trips:', error);
+        toast.error(error.message || 'Không thể tải danh sách chuyến xe');
+        setTrips([]);
+        setFilteredTrips([]);
+      } finally {
+        setLoading(false);
       }
-      return 0;
-    });
+    };
+    loadTrips();
+  }, [from, to, date, searchParams]);
 
-    setFilteredTrips(filtered);
-  };
+  // Apply filters when filters change
+  useEffect(() => {
+    if (trips.length === 0) return;
+    
+    const loadFilteredTrips = async () => {
+      try {
+        const results = await searchTrips({
+          from,
+          to,
+          date,
+          passengers: parseInt(searchParams.get('passengers') || '1'),
+          minPrice: priceRange[0],
+          maxPrice: priceRange[1],
+          busType: selectedBusTypes.length === 1 ? selectedBusTypes[0] : undefined,
+          timeSlot: selectedTimeSlots.length === 1 ? selectedTimeSlots[0] : undefined,
+          sortBy,
+        });
+        setFilteredTrips(results);
+      } catch (error: any) {
+        console.error('Error filtering trips:', error);
+      }
+    };
+    loadFilteredTrips();
+  }, [priceRange, selectedBusTypes, selectedTimeSlots, sortBy, from, to, date, searchParams]);
+
 
   const toggleBusType = (type: string) => {
     setSelectedBusTypes((prev) =>
@@ -419,7 +341,13 @@ export function SearchResultsPage() {
 
         {/* Trip List */}
         <div className="flex-1 space-y-4">
-          {filteredTrips.map((trip) => (
+          {loading && (
+            <Card className="p-12 text-center">
+              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
+              <p className="text-gray-600">Đang tải danh sách chuyến xe...</p>
+            </Card>
+          )}
+          {!loading && filteredTrips.map((trip) => (
             <Card key={trip.id} className="p-6 hover:shadow-xl transition-shadow">
               <div className="flex flex-col lg:flex-row gap-6">
                 {/* Trip Info */}
@@ -492,7 +420,7 @@ export function SearchResultsPage() {
             </Card>
           ))}
 
-          {filteredTrips.length === 0 && (
+          {!loading && filteredTrips.length === 0 && (
             <Card className="p-12 text-center">
               <div className="text-gray-400 mb-4">
                 <MapPin className="w-16 h-16 mx-auto mb-4" />

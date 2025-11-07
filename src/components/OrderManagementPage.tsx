@@ -17,6 +17,8 @@ import {
   Ticket,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { getBookings, cancelBooking } from '../utils/api';
+import { toast } from 'sonner';
 
 interface Order {
   orderId: string;
@@ -36,9 +38,19 @@ export function OrderManagementPage() {
   const [newOrder, setNewOrder] = useState<Order | null>(null);
 
   useEffect(() => {
-    // Load orders from localStorage
-    const savedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-    setOrders(savedOrders);
+    const loadOrders = async () => {
+      try {
+        const data = await getBookings();
+        setOrders(data);
+      } catch (error) {
+        console.error('Error loading orders:', error);
+        // Fallback to localStorage if API fails
+        const savedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+        setOrders(savedOrders);
+      }
+    };
+    
+    loadOrders();
 
     // Check for new order from checkout
     if (location.state?.newOrder && location.state?.showSuccess) {
@@ -89,13 +101,22 @@ export function OrderManagementPage() {
     return labels[method] || method;
   };
 
-  const handleCancelOrder = (orderId: string) => {
-    if (confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) {
-      const updatedOrders = orders.map((order) =>
-        order.orderId === orderId ? { ...order, status: 'cancelled' as const } : order
-      );
-      setOrders(updatedOrders);
-      localStorage.setItem('orders', JSON.stringify(updatedOrders));
+  const handleCancelOrder = async (orderId: string) => {
+    if (!confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) return;
+    
+    try {
+      const order = orders.find(o => o.orderId === orderId);
+      if (!order) return;
+      
+      await cancelBooking(order.id || order.orderId);
+      toast.success('Hủy đơn hàng thành công');
+      
+      // Reload orders
+      const data = await getBookings();
+      setOrders(data);
+    } catch (error: any) {
+      console.error('Error canceling order:', error);
+      toast.error(error.message || 'Không thể hủy đơn hàng');
     }
   };
 
@@ -123,24 +144,30 @@ export function OrderManagementPage() {
       </div>
 
       <div className="space-y-3 mb-4">
-        <div className="flex items-center gap-2 text-gray-700">
-          <Ticket className="w-4 h-4 text-blue-600" />
-          <span>{order.trip.company}</span>
-        </div>
-        <div className="flex items-center gap-2 text-gray-700">
-          <MapPin className="w-4 h-4 text-orange-500" />
-          <span>
-            {order.trip.from} → {order.trip.to}
-          </span>
-        </div>
-        <div className="flex items-center gap-2 text-gray-700">
-          <Calendar className="w-4 h-4 text-blue-600" />
-          <span>{order.trip.departureTime}</span>
-        </div>
+        {order.trip && (
+          <>
+            <div className="flex items-center gap-2 text-gray-700">
+              <Ticket className="w-4 h-4 text-blue-600" />
+              <span>{order.trip.company || 'Nhà xe'}</span>
+            </div>
+            <div className="flex items-center gap-2 text-gray-700">
+              <MapPin className="w-4 h-4 text-orange-500" />
+              <span>
+                {order.trip.from || ''} → {order.trip.to || ''}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-gray-700">
+              <Calendar className="w-4 h-4 text-blue-600" />
+              <span>{order.trip.departureTime || 'N/A'}</span>
+            </div>
+          </>
+        )}
         <div className="flex items-center gap-2 text-gray-700">
           <Users className="w-4 h-4 text-orange-500" />
           <span>
-            Ghế: {order.seats.map((s) => s.number).join(', ')} ({order.seats.length} ghế)
+            Ghế: {order.seats && order.seats.length > 0 
+              ? order.seats.map((s: any) => s.number || s.seatNumber || '').filter(Boolean).join(', ') 
+              : 'N/A'} ({order.seats?.length || 0} ghế)
           </span>
         </div>
       </div>
@@ -275,12 +302,16 @@ export function OrderManagementPage() {
                     <div className="flex justify-between">
                       <span className="text-gray-600">Tuyến đường</span>
                       <span>
-                        {newOrder.trip.from} → {newOrder.trip.to}
+                        {newOrder.trip?.from || ''} → {newOrder.trip?.to || ''}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Số ghế</span>
-                      <span>{newOrder.seats.map((s) => s.number).join(', ')}</span>
+                      <span>
+                        {newOrder.seats && newOrder.seats.length > 0
+                          ? newOrder.seats.map((s: any) => s.number || s.seatNumber || '').filter(Boolean).join(', ')
+                          : 'N/A'}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Tổng tiền</span>

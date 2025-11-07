@@ -1,9 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, Users, Search, Star, Shield, Clock, Award } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import { getPopularRoutes, getStations } from '../utils/api';
+
+interface Station {
+  id: string;
+  name: string;
+  city: string;
+  address: string;
+}
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -14,12 +22,59 @@ export function HomePage() {
     passengers: 1,
   });
 
-  const popularRoutes = [
+  const [stations, setStations] = useState<Station[]>([]);
+  const [popularRoutes, setPopularRoutes] = useState([
     { from: 'Hồ Chí Minh', to: 'Đà Lạt', price: '250,000đ', image: 'dalat nature' },
     { from: 'Hà Nội', to: 'Sapa', price: '320,000đ', image: 'sapa mountain' },
     { from: 'Hồ Chí Minh', to: 'Nha Trang', price: '280,000đ', image: 'nha trang beach' },
     { from: 'Hà Nội', to: 'Hải Phòng', price: '150,000đ', image: 'haiphong city' },
-  ];
+  ]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // Load stations
+        const stationsData = await getStations();
+        if (stationsData && stationsData.length > 0) {
+          // Remove duplicates by name
+          const uniqueStations = stationsData.reduce((acc: Station[], station: Station) => {
+            if (!acc.find(s => s.name === station.name)) {
+              acc.push(station);
+            }
+            return acc;
+          }, []);
+          setStations(uniqueStations);
+          
+          // Set default values if available
+          if (uniqueStations.length > 0) {
+            const hcm = uniqueStations.find(s => s.name === 'Hồ Chí Minh');
+            const dalat = uniqueStations.find(s => s.name === 'Đà Lạt');
+            if (hcm && dalat) {
+              setSearchForm(prev => ({
+                ...prev,
+                from: hcm.name,
+                to: dalat.name,
+              }));
+            }
+          }
+        }
+
+        // Load popular routes
+        const routes = await getPopularRoutes();
+        if (routes && routes.length > 0) {
+          setPopularRoutes(routes.map((r: any) => ({
+            from: r.from,
+            to: r.to,
+            price: r.price,
+            image: `${r.from.toLowerCase()} ${r.to.toLowerCase()}`,
+          })));
+        }
+      } catch (error) {
+        console.error('Error loading data:', error);
+      }
+    };
+    loadData();
+  }, []);
 
   const features = [
     {
@@ -79,11 +134,21 @@ export function HomePage() {
                     onChange={(e) => setSearchForm({ ...searchForm, from: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                   >
-                    <option>Hồ Chí Minh</option>
-                    <option>Hà Nội</option>
-                    <option>Đà Nẵng</option>
-                    <option>Cần Thơ</option>
-                    <option>Nha Trang</option>
+                    {stations.length > 0 ? (
+                      stations.map((station) => (
+                        <option key={station.id} value={station.name}>
+                          {station.name}
+                        </option>
+                      ))
+                    ) : (
+                      <>
+                        <option>Hồ Chí Minh</option>
+                        <option>Hà Nội</option>
+                        <option>Đà Nẵng</option>
+                        <option>Cần Thơ</option>
+                        <option>Nha Trang</option>
+                      </>
+                    )}
                   </select>
                 </div>
 
@@ -98,11 +163,21 @@ export function HomePage() {
                     onChange={(e) => setSearchForm({ ...searchForm, to: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                   >
-                    <option>Đà Lạt</option>
-                    <option>Sapa</option>
-                    <option>Nha Trang</option>
-                    <option>Hải Phòng</option>
-                    <option>Vũng Tàu</option>
+                    {stations.length > 0 ? (
+                      stations.map((station) => (
+                        <option key={station.id} value={station.name}>
+                          {station.name}
+                        </option>
+                      ))
+                    ) : (
+                      <>
+                        <option>Đà Lạt</option>
+                        <option>Sapa</option>
+                        <option>Nha Trang</option>
+                        <option>Hải Phòng</option>
+                        <option>Vũng Tàu</option>
+                      </>
+                    )}
                   </select>
                 </div>
 

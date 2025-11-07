@@ -4,7 +4,9 @@ import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
-import { ArrowLeft, Clock, MapPin, Phone, Mail, User, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Clock, MapPin, Phone, Mail, User, AlertCircle, Loader2 } from 'lucide-react';
+import { getTrip, getTripSeats } from '../utils/api';
+import { toast } from 'sonner';
 
 interface Seat {
   id: string;
@@ -27,77 +29,76 @@ export function SeatSelectionPage() {
     dropoffPoint: '',
   });
   const [holdingTimer, setHoldingTimer] = useState<number | null>(null);
-
-  const trip = {
-    id: tripId,
-    company: 'BX Nam Nghĩa - Quảng Bình',
-    from: 'Hồ Chí Minh',
-    to: 'Đà Lạt',
-    departureTime: '08:00 - 14:40',
-    date: 'Thứ năm, 6 giờ đi phục',
-    price: 320000,
-  };
+  const [trip, setTrip] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Initialize seats
-    const initialSeats: Seat[] = [];
-    
-    // Floor 1 - 6 rows
-    const floor1Layout = [
-      ['B1', 'B2', 'B3', 'B4', 'B5', 'B6'],
-      ['D1', 'D2', 'D3', 'D4', 'D5'],
-    ];
-    
-    floor1Layout.forEach((row, rowIndex) => {
-      row.forEach((seatNum, colIndex) => {
-        const randomStatus = Math.random();
-        let status: 'available' | 'booked' | 'holding' = 'available';
+    const loadTripData = async () => {
+      if (!tripId) {
+        toast.error('Không tìm thấy thông tin chuyến xe');
+        navigate('/search');
+        return;
+      }
+      setLoading(true);
+      try {
+        const tripData = await getTrip(tripId);
+        const seatsData = await getTripSeats(tripId);
         
-        if (randomStatus < 0.15) status = 'booked';
-        else if (randomStatus < 0.25) status = 'holding';
+        if (!tripData) {
+          throw new Error('Không tìm thấy thông tin chuyến xe');
+        }
         
-        initialSeats.push({
-          id: `floor1-${seatNum}`,
-          row: rowIndex,
-          number: seatNum,
-          floor: 1,
-          status,
+        // Ensure price is a number
+        const price = typeof tripData.price === 'number' 
+          ? tripData.price 
+          : parseFloat(tripData.price) || 0;
+        
+        setTrip({
+          id: tripData.id,
+          company: tripData.company || 'Nhà xe',
+          from: tripData.from || '',
+          to: tripData.to || '',
+          departureTime: tripData.departureTime && tripData.arrivalTime
+            ? `${tripData.departureTime} - ${tripData.arrivalTime}`
+            : tripData.departureTime || '',
+          date: new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+          price: price,
         });
-      });
-    });
-
-    // Floor 2 - 6 rows
-    const floor2Layout = [
-      ['F1', 'F2', 'F3', 'F4', 'F5'],
-      ['A1', 'A2', 'A3', 'A4', 'A5', 'A6'],
-      ['C1', 'C2', 'C3', 'C4', 'C5'],
-      ['E1', 'E2', 'E3', 'E4', 'E5'],
-    ];
-    
-    floor2Layout.forEach((row, rowIndex) => {
-      row.forEach((seatNum, colIndex) => {
-        const randomStatus = Math.random();
-        let status: 'available' | 'booked' | 'holding' = 'available';
         
-        if (randomStatus < 0.15) status = 'booked';
-        else if (randomStatus < 0.25) status = 'holding';
-        
-        initialSeats.push({
-          id: `floor2-${seatNum}`,
-          row: rowIndex,
-          number: seatNum,
-          floor: 2,
-          status,
-        });
-      });
-    });
+        if (seatsData && Array.isArray(seatsData)) {
+          setSeats(seatsData.map((seat: any) => ({
+            id: seat.id,
+            row: seat.row || 0,
+            number: seat.number || '',
+            floor: seat.floor || 1,
+            status: seat.status || 'available',
+          })));
+        }
+      } catch (error: any) {
+        console.error('Error loading trip:', error);
+        toast.error(error.message || 'Không thể tải thông tin chuyến xe');
+        navigate('/search');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadTripData();
+  }, [tripId, navigate]);
 
-    setSeats(initialSeats);
+  // Initialize holding timer when trip is loaded
+  useEffect(() => {
+    if (trip && holdingTimer === null) {
+      setHoldingTimer(15 * 60); // 15 minutes in seconds
+    }
+  }, [trip, holdingTimer]);
 
-    // Simulate holding timer
+  // Timer for holding seats
+  useEffect(() => {
+    if (holdingTimer === null) return;
+
     const interval = setInterval(() => {
       setHoldingTimer((prev) => {
-        if (prev === null) return 15 * 60; // 15 minutes in seconds
+        if (prev === null) return 15 * 60;
         if (prev <= 1) {
           // Release holding seats
           setSeats((prevSeats) =>
@@ -112,7 +113,7 @@ export function SeatSelectionPage() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [holdingTimer]);
 
   const handleSeatClick = (seatId: string) => {
     setSeats((prevSeats) =>
@@ -145,17 +146,19 @@ export function SeatSelectionPage() {
   };
 
   const selectedSeats = seats.filter((seat) => seat.status === 'selected');
-  const totalPrice = selectedSeats.length * trip.price;
+  const totalPrice = trip ? selectedSeats.length * trip.price : 0;
 
   const handleContinue = () => {
     if (selectedSeats.length === 0) {
-      alert('Vui lòng chọn ít nhất một chỗ');
+      toast.error('Vui lòng chọn ít nhất một chỗ');
       return;
     }
     if (!customerInfo.phone || !customerInfo.name) {
-      alert('Vui lòng điền đầy đủ thông tin liên hệ');
+      toast.error('Vui lòng điền đầy đủ thông tin liên hệ');
       return;
     }
+
+    if (!trip) return;
 
     // Navigate to checkout
     navigate('/checkout', {
@@ -176,6 +179,16 @@ export function SeatSelectionPage() {
 
   const floor1Seats = seats.filter((seat) => seat.floor === 1);
   const floor2Seats = seats.filter((seat) => seat.floor === 2);
+
+  if (loading || !trip) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -210,7 +223,9 @@ export function SeatSelectionPage() {
                 <div className="text-sm text-gray-500 mt-1">{trip.date}</div>
               </div>
               <div className="text-right">
-                <div className="text-3xl text-orange-500">{trip.price.toLocaleString('vi-VN')}đ</div>
+                <div className="text-3xl text-orange-500">
+                  {trip.price ? trip.price.toLocaleString('vi-VN') : '0'}đ
+                </div>
                 <div className="text-sm text-gray-500">/ khách</div>
               </div>
             </div>

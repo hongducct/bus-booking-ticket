@@ -16,6 +16,8 @@ import {
   Mail,
   ArrowLeft,
 } from 'lucide-react';
+import { createBooking } from '../utils/api';
+import { toast } from 'sonner';
 
 export function CheckoutPage() {
   const navigate = useNavigate();
@@ -61,38 +63,54 @@ export function CheckoutPage() {
     },
   ];
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     setIsProcessing(true);
     
-    // Simulate payment processing
-    setTimeout(() => {
-      // Save to localStorage
-      const orderId = `VX${Date.now()}`;
-      const order = {
-        orderId,
-        trip,
-        seats,
-        customerInfo,
-        totalPrice,
-        paymentMethod,
-        status: paymentMethod === 'cash' ? 'pending' : 'confirmed',
-        bookingDate: new Date().toISOString(),
-      };
+    try {
+      if (!trip?.id || !seats || seats.length === 0) {
+        toast.error('Thông tin đặt vé không đầy đủ');
+        setIsProcessing(false);
+        return;
+      }
       
-      const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-      existingOrders.push(order);
-      localStorage.setItem('orders', JSON.stringify(existingOrders));
+      const booking = await createBooking({
+        tripId: trip.id,
+        customerName: customerInfo?.name || '',
+        customerPhone: customerInfo?.phone || '',
+        customerEmail: customerInfo?.email || '',
+        pickupPoint: customerInfo?.pickupPoint || '',
+        dropoffPoint: customerInfo?.dropoffPoint || '',
+        seats: seats.map((seat: any) => ({ seatId: seat.id || seat.seatId })),
+      });
       
-      setIsProcessing(false);
+      // Update payment method if not cash
+      if (paymentMethod !== 'cash') {
+        // You can add API call to update payment method here
+        // await updatePaymentMethod(booking.id, paymentMethod);
+      }
+      
+      toast.success('Đặt vé thành công!');
       
       // Navigate to success page
       navigate('/orders', { 
         state: { 
-          newOrder: order,
+          newOrder: {
+            ...booking,
+            trip,
+            seats,
+            customerInfo,
+            totalPrice,
+            paymentMethod,
+          },
           showSuccess: true 
         } 
       });
-    }, 2000);
+    } catch (error: any) {
+      console.error('Error creating booking:', error);
+      toast.error(error.message || 'Có lỗi xảy ra khi đặt vé. Vui lòng thử lại.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -186,15 +204,15 @@ export function CheckoutPage() {
             <div className="space-y-4">
               {/* Trip Info */}
               <div className="p-4 bg-gradient-to-r from-blue-50 to-orange-50 rounded-lg">
-                <h3 className="mb-2">{trip.company}</h3>
+                <h3 className="mb-2">{trip.company || 'Nhà xe'}</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2 text-gray-600">
                     <Clock className="w-4 h-4" />
-                    <span>{trip.departureTime}</span>
+                    <span>{trip.departureTime || 'N/A'}</span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-600">
                     <MapPin className="w-4 h-4" />
-                    <span>{trip.from} → {trip.to}</span>
+                    <span>{trip.from || ''} → {trip.to || ''}</span>
                   </div>
                 </div>
               </div>
@@ -203,14 +221,18 @@ export function CheckoutPage() {
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm text-gray-600">Ghế đã chọn</span>
-                  <span className="text-sm">{seats.length} ghế</span>
+                  <span className="text-sm">{seats?.length || 0} ghế</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {seats.map((seat: any) => (
-                    <Badge key={seat.id} variant="secondary">
-                      {seat.number}
-                    </Badge>
-                  ))}
+                  {seats && seats.length > 0 ? (
+                    seats.map((seat: any) => (
+                      <Badge key={seat.id || seat.number} variant="secondary">
+                        {seat.number || seat.seatNumber || 'N/A'}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-gray-500 text-sm">Chưa chọn ghế</span>
+                  )}
                 </div>
               </div>
 
@@ -231,8 +253,10 @@ export function CheckoutPage() {
               {/* Pricing */}
               <div className="border-t border-gray-200 pt-4 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Giá vé ({seats.length} x {trip.price.toLocaleString('vi-VN')}đ)</span>
-                  <span>{totalPrice.toLocaleString('vi-VN')}đ</span>
+                  <span className="text-gray-600">
+                    Giá vé ({(seats?.length || 0)} x {(trip.price || 0).toLocaleString('vi-VN')}đ)
+                  </span>
+                  <span>{(totalPrice || 0).toLocaleString('vi-VN')}đ</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Phí dịch vụ</span>
