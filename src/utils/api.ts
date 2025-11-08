@@ -1,5 +1,22 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://bus-booking-ticket-nest-production.up.railway.app/api';
 
+// Helper to get auth token
+function getAuthToken(): string | null {
+  return localStorage.getItem('auth_token');
+}
+
+// Helper to create headers with auth
+function getHeaders(includeAuth = false): HeadersInit {
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (includeAuth) {
+    const token = getAuthToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+  }
+  return headers;
+}
+
 // Helper function to format duration from minutes to "6h 40p"
 function formatDuration(minutes: number): string {
   const hours = Math.floor(minutes / 60);
@@ -121,9 +138,11 @@ export async function createBooking(bookingData: {
   return response.json();
 }
 
-// Get all bookings
+// Get all bookings (requires auth)
 export async function getBookings() {
-  const response = await fetch(`${API_BASE_URL}/bookings`);
+  const response = await fetch(`${API_BASE_URL}/bookings`, {
+    headers: getHeaders(true),
+  });
   if (!response.ok) {
     throw new Error('Failed to get bookings');
   }
@@ -195,10 +214,11 @@ export async function searchBooking(query: string) {
   };
 }
 
-// Cancel booking
+// Cancel booking (requires auth)
 export async function cancelBooking(bookingId: string) {
   const response = await fetch(`${API_BASE_URL}/bookings/${bookingId}/cancel`, {
     method: 'PUT',
+    headers: getHeaders(true),
   });
   if (!response.ok) {
     throw new Error('Failed to cancel booking');

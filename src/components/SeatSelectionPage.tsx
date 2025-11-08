@@ -153,8 +153,8 @@ export function SeatSelectionPage() {
       toast.error('Vui lòng chọn ít nhất một chỗ');
       return;
     }
-    if (!customerInfo.phone || !customerInfo.name) {
-      toast.error('Vui lòng điền đầy đủ thông tin liên hệ');
+    if (!customerInfo.phone || !customerInfo.name || !customerInfo.email) {
+      toast.error('Vui lòng điền đầy đủ thông tin: Họ tên, Số điện thoại và Email');
       return;
     }
 
@@ -436,10 +436,11 @@ export function SeatSelectionPage() {
                 </label>
                 <Input
                   type="tel"
-                  placeholder="Số điện thoại"
+                  placeholder="Số điện thoại (bắt buộc)"
                   value={customerInfo.phone}
                   onChange={(e) => setCustomerInfo({ ...customerInfo, phone: e.target.value })}
                   className="w-full"
+                  required
                 />
               </div>
 
@@ -450,24 +451,26 @@ export function SeatSelectionPage() {
                 </label>
                 <Input
                   type="text"
-                  placeholder="Họ tên"
+                  placeholder="Họ tên (bắt buộc)"
                   value={customerInfo.name}
                   onChange={(e) => setCustomerInfo({ ...customerInfo, name: e.target.value })}
                   className="w-full"
+                  required
                 />
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm text-gray-600 flex items-center gap-2">
                   <Mail className="w-4 h-4" />
-                  Email
+                  Email *
                 </label>
                 <Input
                   type="email"
-                  placeholder="Email"
+                  placeholder="Email (bắt buộc)"
                   value={customerInfo.email}
                   onChange={(e) => setCustomerInfo({ ...customerInfo, email: e.target.value })}
                   className="w-full"
+                  required
                 />
               </div>
             </div>
@@ -534,7 +537,7 @@ export function SeatSelectionPage() {
             <div className="mt-6 space-y-3">
               <Button
                 onClick={handleContinue}
-                disabled={selectedSeats.length === 0 || !customerInfo.phone || !customerInfo.name}
+                disabled={selectedSeats.length === 0 || !customerInfo.phone || !customerInfo.name || !customerInfo.email}
                 className="w-full bg-gradient-to-r from-blue-600 to-orange-500 hover:from-blue-700 hover:to-orange-600 text-white py-6"
               >
                 Tiếp tục

@@ -27,14 +27,23 @@ export function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'momo' | 'bank' | 'cash'>('momo');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  if (!trip || !seats) {
+  if (!trip || !seats || seats.length === 0) {
     return (
       <div className="container mx-auto px-4 py-12 text-center">
-        <p className="text-gray-500 mb-4">Không tìm thấy thông tin đặt vé</p>
+        <p className="text-gray-500 dark:text-gray-400 mb-4">Không tìm thấy thông tin đặt vé</p>
         <Button onClick={() => navigate('/')}>Về trang chủ</Button>
       </div>
     );
   }
+
+  // Ensure customerInfo has required fields
+  const requiredCustomerInfo = {
+    name: customerInfo?.name || '',
+    phone: customerInfo?.phone || '',
+    email: customerInfo?.email || '',
+    pickupPoint: customerInfo?.pickupPoint || '',
+    dropoffPoint: customerInfo?.dropoffPoint || '',
+  };
 
   const paymentMethods = [
     {
@@ -73,13 +82,27 @@ export function CheckoutPage() {
         return;
       }
       
+      // Validate required fields
+      if (!requiredCustomerInfo.name || !requiredCustomerInfo.phone) {
+        toast.error('Vui lòng điền đầy đủ họ tên và số điện thoại');
+        setIsProcessing(false);
+        return;
+      }
+
+      // Email is required for booking
+      if (!requiredCustomerInfo.email) {
+        toast.error('Vui lòng nhập email để đặt vé');
+        setIsProcessing(false);
+        return;
+      }
+
       const booking = await createBooking({
         tripId: trip.id,
-        customerName: customerInfo?.name || '',
-        customerPhone: customerInfo?.phone || '',
-        customerEmail: customerInfo?.email || '',
-        pickupPoint: customerInfo?.pickupPoint || '',
-        dropoffPoint: customerInfo?.dropoffPoint || '',
+        customerName: requiredCustomerInfo.name,
+        customerPhone: requiredCustomerInfo.phone,
+        customerEmail: requiredCustomerInfo.email,
+        pickupPoint: requiredCustomerInfo.pickupPoint || undefined,
+        dropoffPoint: requiredCustomerInfo.dropoffPoint || undefined,
         seats: seats.map((seat: any) => ({ seatId: seat.id || seat.seatId })),
       });
       
