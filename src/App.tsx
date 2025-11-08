@@ -60,12 +60,6 @@ function AppContent() {
                 >
                   {t('common.orders')}
                 </Link>
-                <div className="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-1" />
-                <div className="flex items-center gap-0.5">
-                  <LanguageSwitcher />
-                  <ThemeSwitcher />
-                </div>
-                <div className="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-1" />
                 <UserMenu />
               </div>
 
@@ -102,12 +96,6 @@ function AppContent() {
                 >
                   {t('common.orders')}
                 </Link>
-                <div className="flex items-center gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
-                  <span className="text-sm text-gray-500 dark:text-gray-400 px-3">{t('common.language')}:</span>
-                  <LanguageSwitcher />
-                  <span className="text-sm text-gray-500 dark:text-gray-400 px-3">{t('common.theme')}:</span>
-                  <ThemeSwitcher />
-                </div>
                 <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
                   <UserMenu />
                 </div>
@@ -138,6 +126,12 @@ function AppContent() {
 
         {/* Live Chat Support */}
         <LiveChatSupport />
+
+        {/* Floating Language & Theme Switcher */}
+        <div className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 flex flex-col gap-3">
+          <LanguageSwitcher />
+          <ThemeSwitcher />
+        </div>
 
         {/* Footer */}
         <footer className="bg-gray-900 dark:bg-gray-950 text-white mt-20 border-t border-gray-800">
