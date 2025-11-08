@@ -23,8 +23,8 @@ export function LanguageSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <Languages className="h-5 w-5" />
+        <Button variant="ghost" size="icon" className="relative h-9 w-9 hover:bg-gray-100 dark:hover:bg-gray-700">
+          <Languages className="h-4 w-4" />
           <span className="sr-only">{t('common.language')}</span>
         </Button>
       </DropdownMenuTrigger>

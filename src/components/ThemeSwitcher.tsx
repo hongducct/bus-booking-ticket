@@ -16,11 +16,11 @@ export function ThemeSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button variant="ghost" size="icon" className="relative h-9 w-9 hover:bg-gray-100 dark:hover:bg-gray-700">
           {resolvedTheme === 'dark' ? (
-            <Moon className="h-5 w-5" />
+            <Moon className="h-4 w-4" />
           ) : (
-            <Sun className="h-5 w-5" />
+            <Sun className="h-4 w-4" />
           )}
           <span className="sr-only">{t('common.theme')}</span>
         </Button>

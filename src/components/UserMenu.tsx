@@ -26,10 +26,17 @@ export function UserMenu() {
   if (!user) {
     return (
       <div className="flex items-center gap-2">
-        <Button variant="ghost" asChild className="hover:bg-gray-100 dark:hover:bg-gray-700">
+        <Button 
+          variant="ghost" 
+          asChild 
+          className="hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2 text-sm font-medium"
+        >
           <Link to="/login">{t('common.login')}</Link>
         </Button>
-        <Button asChild className="bg-gradient-to-r from-blue-600 to-orange-500 hover:from-blue-700 hover:to-orange-600 text-white shadow-md">
+        <Button 
+          asChild 
+          className="bg-gradient-to-r from-blue-600 to-orange-500 hover:from-blue-700 hover:to-orange-600 text-white shadow-md px-4 py-2 text-sm font-medium"
+        >
           <Link to="/register">{t('common.register')}</Link>
         </Button>
       </div>

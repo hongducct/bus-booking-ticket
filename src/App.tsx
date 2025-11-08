@@ -44,25 +44,27 @@ function AppContent() {
               <div className="hidden md:flex items-center gap-3">
                 <Link 
                   to="/" 
-                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-colors px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-colors px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium whitespace-nowrap"
                 >
                   {t('common.home')}
                 </Link>
                 <Link 
                   to="/tracking" 
-                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-colors px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-colors px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium whitespace-nowrap"
                 >
                   {t('common.tracking')}
                 </Link>
                 <Link 
                   to="/orders" 
-                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-colors px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-colors px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium whitespace-nowrap"
                 >
                   {t('common.orders')}
                 </Link>
                 <div className="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-1" />
-                <LanguageSwitcher />
-                <ThemeSwitcher />
+                <div className="flex items-center gap-0.5">
+                  <LanguageSwitcher />
+                  <ThemeSwitcher />
+                </div>
                 <div className="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-1" />
                 <UserMenu />
               </div>
