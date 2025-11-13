@@ -171,7 +171,7 @@ export async function getBookings() {
       },
       totalPrice: parseFloat(booking.totalPrice || 0),
       paymentMethod: booking.paymentMethod || 'cash',
-      status: booking.status || 'pending',
+      status: (booking.status || 'pending').toLowerCase(),
       bookingDate: booking.createdAt || booking.bookingDate || new Date().toISOString(),
     };
   });
@@ -240,6 +240,82 @@ export async function getPopularRoutes() {
   const response = await fetch(`${API_BASE_URL}/stations/popular-routes`);
   if (!response.ok) {
     throw new Error('Failed to get popular routes');
+  }
+  return response.json();
+}
+
+// Admin APIs
+export async function updateBookingStatus(bookingId: string, status: string) {
+  console.log('updateBookingStatus called:', { bookingId, status });
+  
+  const response = await fetch(`${API_BASE_URL}/bookings/${bookingId}/status`, {
+    method: 'PUT',
+    headers: getHeaders(true),
+    body: JSON.stringify({ status }),
+  });
+  
+  console.log('updateBookingStatus response:', { 
+    ok: response.ok, 
+    status: response.status, 
+    statusText: response.statusText 
+  });
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Failed to update booking status' }));
+    console.error('updateBookingStatus error:', error);
+    throw new Error(error.message || 'Failed to update booking status');
+  }
+  
+  const data = await response.json();
+  console.log('updateBookingStatus success:', data);
+  return data;
+}
+
+export async function createAdmin(adminData: { email: string; password: string; name?: string; phone?: string }) {
+  const response = await fetch(`${API_BASE_URL}/auth/create-admin`, {
+    method: 'POST',
+    headers: getHeaders(true),
+    body: JSON.stringify(adminData),
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Failed to create admin' }));
+    throw new Error(error.message || 'Failed to create admin');
+  }
+  return response.json();
+}
+
+export async function createTrip(tripData: any) {
+  const response = await fetch(`${API_BASE_URL}/trips`, {
+    method: 'POST',
+    headers: getHeaders(true),
+    body: JSON.stringify(tripData),
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Failed to create trip' }));
+    throw new Error(error.message || 'Failed to create trip');
+  }
+  return response.json();
+}
+
+export async function createTripsBatch(tripsData: any) {
+  const response = await fetch(`${API_BASE_URL}/trips/batch`, {
+    method: 'POST',
+    headers: getHeaders(true),
+    body: JSON.stringify(tripsData),
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Failed to create trips' }));
+    throw new Error(error.message || 'Failed to create trips');
+  }
+  return response.json();
+}
+
+export async function getDashboardStats() {
+  const response = await fetch(`${API_BASE_URL}/statistics/dashboard`, {
+    headers: getHeaders(true),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to get dashboard stats');
   }
   return response.json();
 }

@@ -58,7 +58,7 @@ export function LiveChatSupport() {
           'Bạn có thể hủy vé trước 24 giờ khởi hành để được hoàn 90% giá vé. Trước 12 giờ: hoàn 70%. Trước 2 giờ: hoàn 50%. Để hủy vé, vui lòng truy cập trang Quản lý đơn hàng.';
       } else if (lowerText.includes('hotline') || lowerText.includes('liên hệ')) {
         botResponse =
-          'Hotline hỗ trợ 24/7: 1900 6467. Email: support@vexeviet.com. Chúng tôi luôn sẵn sàng hỗ trợ bạn!';
+          'Hotline hỗ trợ 24/7: 1900 6467. Email: support@hongducct.id.vn Chúng tôi luôn sẵn sàng hỗ trợ bạn!';
       } else if (lowerText.includes('thanh toán') || lowerText.includes('payment')) {
         botResponse =
           'Chúng tôi hỗ trợ nhiều phương thức thanh toán: Ví MoMo, chuyển khoản ngân hàng, thẻ tín dụng/ghi nợ, và tiền mặt khi lên xe.';

@@ -57,6 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (email: string, password: string, name?: string, phone?: string) => {
     const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://bus-booking-ticket-nest-production.up.railway.app/api';
+    console.log('API_BASE_URL', API_BASE_URL);
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

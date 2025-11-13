@@ -12,16 +12,22 @@ import { TrackingPage } from './components/TrackingPage';
 import { LoginPage } from './components/LoginPage';
 import { RegisterPage } from './components/RegisterPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { AdminDashboard } from './components/AdminDashboard';
+import { AdminBookingsPage } from './components/AdminBookingsPage';
+import { AdminTripsPage } from './components/AdminTripsPage';
+import { AdminUsersPage } from './components/AdminUsersPage';
 import { UserMenu } from './components/UserMenu';
 import { ThemeSwitcher } from './components/ThemeSwitcher';
 import { LanguageSwitcher } from './components/LanguageSwitcher';
 import { LiveChatSupport } from './components/LiveChatSupport';
 import { Toaster } from './components/ui/sonner';
 import { Bus, Menu, X } from 'lucide-react';
+import { useAuth } from './contexts/AuthContext';
 
 function AppContent() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { t } = useTranslation();
+  const { isAdmin } = useAuth();
 
   return (
     <Router>
@@ -48,6 +54,14 @@ function AppContent() {
                 >
                   {t('common.home')}
                 </Link>
+                {isAdmin && (
+                  <Link 
+                    to="/admin" 
+                    className="text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-colors px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium whitespace-nowrap"
+                  >
+                    Admin
+                  </Link>
+                )}
                 <Link 
                   to="/tracking" 
                   className="text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-colors px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium whitespace-nowrap"
@@ -121,6 +135,38 @@ function AppContent() {
             }
           />
           <Route path="/tracking" element={<TrackingPage />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/bookings"
+            element={
+              <ProtectedRoute>
+                <AdminBookingsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/trips"
+            element={
+              <ProtectedRoute>
+                <AdminTripsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute>
+                <AdminUsersPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
 
@@ -128,7 +174,7 @@ function AppContent() {
         <LiveChatSupport />
 
         {/* Floating Language & Theme Switcher */}
-        <div className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 flex flex-col gap-3">
+        <div className="fixed right-4 md:right-6 z-50 flex flex-col gap-3" style={{ top: '100px' }}>
           <LanguageSwitcher />
           <ThemeSwitcher />
         </div>
