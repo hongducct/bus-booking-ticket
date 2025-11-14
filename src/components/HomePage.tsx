@@ -16,18 +16,18 @@ interface Station {
 export function HomePage() {
   const navigate = useNavigate();
   const [searchForm, setSearchForm] = useState({
-    from: 'Hồ Chí Minh',
-    to: 'Đà Lạt',
+    from: 'Hà Nội',
+    to: 'Hà Tĩnh',
     date: new Date().toISOString().split('T')[0],
     passengers: 1,
   });
 
   const [stations, setStations] = useState<Station[]>([]);
   const [popularRoutes, setPopularRoutes] = useState([
-    { from: 'Hồ Chí Minh', to: 'Đà Lạt', price: '250,000đ', image: 'dalat nature' },
+    { from: 'Hà Nội', to: 'Hà Tĩnh', price: '250,000đ', image: 'dalat nature' },
     { from: 'Hà Nội', to: 'Sapa', price: '320,000đ', image: 'sapa mountain' },
-    { from: 'Hồ Chí Minh', to: 'Nha Trang', price: '280,000đ', image: 'nha trang beach' },
-    { from: 'Hà Nội', to: 'Hải Phòng', price: '150,000đ', image: 'haiphong city' },
+    { from: 'Hà Tĩnh', to: 'Hà Nội', price: '280,000đ', image: 'nha trang beach' },
+    { from: 'Hà Nội', to: 'Hà Tĩnh', price: '150,000đ', image: 'haiphong city' },
   ]);
 
   useEffect(() => {
@@ -47,13 +47,13 @@ export function HomePage() {
           
           // Set default values if available
           if (uniqueStations.length > 0) {
-            const hcm = uniqueStations.find(s => s.name === 'Hồ Chí Minh');
-            const dalat = uniqueStations.find(s => s.name === 'Đà Lạt');
-            if (hcm && dalat) {
+            const hn = uniqueStations.find(s => s.name === 'Hà Nội');
+            const htn = uniqueStations.find(s => s.name === 'Hà Tĩnh');
+            if (hn && htn) {
               setSearchForm(prev => ({
                 ...prev,
-                from: hcm.name,
-                to: dalat.name,
+                from: hn.name,
+                to: htn.name,
               }));
             }
           }
@@ -112,10 +112,10 @@ export function HomePage() {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center mb-12">
             <h1 className="text-5xl md:text-6xl mb-6 bg-gradient-to-r from-blue-600 to-orange-500 bg-clip-text text-transparent">
-              Đặt vé xe khách dễ dàng
+              MaiLinh Transit
             </h1>
             <p className="text-xl text-gray-600">
-              Hơn 1000+ tuyến đường, hàng ngàn chuyến xe mỗi ngày
+              Hành trình an toàn, tiện nghi - Đồng hành cùng bạn trên mọi nẻo đường
             </p>
           </div>
 
@@ -134,21 +134,11 @@ export function HomePage() {
                     onChange={(e) => setSearchForm({ ...searchForm, from: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                   >
-                    {stations.length > 0 ? (
-                      stations.map((station) => (
-                        <option key={station.id} value={station.name}>
-                          {station.name}
-                        </option>
-                      ))
-                    ) : (
-                      <>
-                        <option>Hồ Chí Minh</option>
-                        <option>Hà Nội</option>
-                        <option>Đà Nẵng</option>
-                        <option>Cần Thơ</option>
-                        <option>Nha Trang</option>
-                      </>
-                    )}
+                    {stations.map((station) => (
+                      <option key={station.id} value={station.name}>
+                        {station.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -163,21 +153,11 @@ export function HomePage() {
                     onChange={(e) => setSearchForm({ ...searchForm, to: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                   >
-                    {stations.length > 0 ? (
-                      stations.map((station) => (
-                        <option key={station.id} value={station.name}>
-                          {station.name}
-                        </option>
-                      ))
-                    ) : (
-                      <>
-                        <option>Đà Lạt</option>
-                        <option>Sapa</option>
-                        <option>Nha Trang</option>
-                        <option>Hải Phòng</option>
-                        <option>Vũng Tàu</option>
-                      </>
-                    )}
+                    {stations.map((station) => (
+                      <option key={station.id} value={station.name}>
+                        {station.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -290,15 +270,15 @@ export function HomePage() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-5xl mb-2">1000+</div>
+              <div className="text-5xl mb-2">50+</div>
               <div className="text-blue-100">Tuyến đường</div>
             </div>
             <div>
-              <div className="text-5xl mb-2">500+</div>
-              <div className="text-blue-100">Nhà xe</div>
+              <div className="text-5xl mb-2">200+</div>
+              <div className="text-blue-100">Chuyến xe/ngày</div>
             </div>
             <div>
-              <div className="text-5xl mb-2">1M+</div>
+              <div className="text-5xl mb-2">500K+</div>
               <div className="text-blue-100">Khách hàng</div>
             </div>
             <div>

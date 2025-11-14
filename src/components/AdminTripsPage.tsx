@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
-import { getStations, getPopularRoutes, createTrip, createTripsBatch } from '../utils/api';
+import { getStations, createTrip, createTripsBatch } from '../utils/api';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -13,10 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 export function AdminTripsPage() {
   const { isAdmin } = useAuth();
   const [stations, setStations] = useState<any[]>([]);
-  const [companies, setCompanies] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    companyId: '',
     fromStationId: '',
     toStationId: '',
     date: new Date().toISOString().split('T')[0],
@@ -29,7 +27,6 @@ export function AdminTripsPage() {
     amenities: [] as string[],
   });
   const [batchFormData, setBatchFormData] = useState({
-    companyId: '',
     fromStationId: '',
     toStationId: '',
     startDate: new Date().toISOString().split('T')[0],
@@ -53,10 +50,6 @@ export function AdminTripsPage() {
     try {
       const stationsData = await getStations();
       setStations(stationsData);
-      
-      // Get companies from popular routes (temporary solution)
-      const routes = await getPopularRoutes();
-      // You might need to add a getCompanies API endpoint
     } catch (error) {
       console.error('Failed to load data:', error);
     }
@@ -121,15 +114,6 @@ export function AdminTripsPage() {
               <form onSubmit={handleCreateTrip} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>Nhà xe (Company ID)</Label>
-                    <Input
-                      value={formData.companyId}
-                      onChange={(e) => setFormData({ ...formData, companyId: e.target.value })}
-                      placeholder="Nhập ID nhà xe"
-                      required
-                    />
-                  </div>
-                  <div>
                     <Label>Điểm đi</Label>
                     <Select
                       value={formData.fromStationId}
@@ -138,7 +122,7 @@ export function AdminTripsPage() {
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn điểm đi" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-white">
                         {stations.map((station) => (
                           <SelectItem key={station.id} value={station.id}>
                             {station.name}
@@ -156,7 +140,7 @@ export function AdminTripsPage() {
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn điểm đến" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-white">
                         {stations.map((station) => (
                           <SelectItem key={station.id} value={station.id}>
                             {station.name}
@@ -253,15 +237,6 @@ export function AdminTripsPage() {
               <form onSubmit={handleCreateBatch} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>Nhà xe (Company ID)</Label>
-                    <Input
-                      value={batchFormData.companyId}
-                      onChange={(e) => setBatchFormData({ ...batchFormData, companyId: e.target.value })}
-                      placeholder="Nhập ID nhà xe"
-                      required
-                    />
-                  </div>
-                  <div>
                     <Label>Điểm đi</Label>
                     <Select
                       value={batchFormData.fromStationId}
@@ -270,7 +245,7 @@ export function AdminTripsPage() {
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn điểm đi" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-white">
                         {stations.map((station) => (
                           <SelectItem key={station.id} value={station.id}>
                             {station.name}
@@ -288,7 +263,7 @@ export function AdminTripsPage() {
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn điểm đến" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-white">
                         {stations.map((station) => (
                           <SelectItem key={station.id} value={station.id}>
                             {station.name}
@@ -361,7 +336,7 @@ export function AdminTripsPage() {
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-white">
                         <SelectItem value="seat">Ghế ngồi</SelectItem>
                         <SelectItem value="sleeper">Giường nằm</SelectItem>
                         <SelectItem value="limousine">Limousine</SelectItem>

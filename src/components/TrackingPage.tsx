@@ -147,7 +147,7 @@ export function TrackingPage() {
                   <div className="space-y-3">
                     <div className="p-4 bg-gradient-to-r from-blue-50 to-orange-50 rounded-lg">
                       <div className="text-gray-600 text-sm mb-2">Nhà xe</div>
-                      <div className="text-lg">{searchResult.trip.company || 'Nhà xe'}</div>
+                      <div className="text-lg">MaiLinh Transit</div>
                     </div>
                     <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
                       <MapPin className="w-5 h-5 text-orange-500 mt-1" />

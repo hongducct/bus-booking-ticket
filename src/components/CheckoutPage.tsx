@@ -22,7 +22,7 @@ import { toast } from 'sonner';
 export function CheckoutPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { trip, seats, customerInfo, totalPrice } = location.state || {};
+  const { trip, seats, customerInfo, totalPrice, pickupPoints, dropoffPoints } = location.state || {};
   
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'momo' | 'bank' | 'cash'>('momo');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -41,8 +41,8 @@ export function CheckoutPage() {
     name: customerInfo?.name || '',
     phone: customerInfo?.phone || '',
     email: customerInfo?.email || '',
-    pickupPoint: customerInfo?.pickupPoint || '',
-    dropoffPoint: customerInfo?.dropoffPoint || '',
+    pickupPointId: customerInfo?.pickupPointId || '',
+    dropoffPointId: customerInfo?.dropoffPointId || '',
   };
 
   const paymentMethods = [
@@ -101,8 +101,8 @@ export function CheckoutPage() {
         customerName: requiredCustomerInfo.name,
         customerPhone: requiredCustomerInfo.phone,
         customerEmail: requiredCustomerInfo.email,
-        pickupPoint: requiredCustomerInfo.pickupPoint || undefined,
-        dropoffPoint: requiredCustomerInfo.dropoffPoint || undefined,
+        pickupPointId: requiredCustomerInfo.pickupPointId || undefined,
+        dropoffPointId: requiredCustomerInfo.dropoffPointId || undefined,
         seats: seats.map((seat: any) => ({ seatId: seat.id || seat.seatId })),
       });
       
@@ -227,7 +227,7 @@ export function CheckoutPage() {
             <div className="space-y-4">
               {/* Trip Info */}
               <div className="p-4 bg-gradient-to-r from-blue-50 to-orange-50 rounded-lg">
-                <h3 className="mb-2">{trip.company || 'Nhà xe'}</h3>
+                <h3 className="mb-2">MaiLinh Transit</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2 text-gray-600">
                     <Clock className="w-4 h-4" />
@@ -260,16 +260,16 @@ export function CheckoutPage() {
               </div>
 
               {/* Pickup/Dropoff */}
-              {customerInfo.pickupPoint && (
+              {pickupPoints.find(p => p.id === customerInfo?.pickupPointId) && (
                 <div>
                   <div className="text-sm text-gray-600 mb-1">Điểm đón</div>
-                  <div className="text-sm">{customerInfo.pickupPoint}</div>
+                  <div className="text-sm">{pickupPoints.find(p => p.id === customerInfo?.pickupPointId)?.name}</div>
                 </div>
               )}
-              {customerInfo.dropoffPoint && (
+              {dropoffPoints.find(p => p.id === customerInfo?.dropoffPointId) && (
                 <div>
                   <div className="text-sm text-gray-600 mb-1">Điểm trả</div>
-                  <div className="text-sm">{customerInfo.dropoffPoint}</div>
+                  <div className="text-sm">{dropoffPoints.find(p => p.id === customerInfo?.dropoffPointId)?.name}</div>
                 </div>
               )}
 

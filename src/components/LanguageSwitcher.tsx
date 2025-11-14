@@ -39,7 +39,7 @@ export function LanguageSwitcher() {
           <Languages className="h-5 w-5 text-white" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" side="left">
+      <DropdownMenuContent align="end" side="left" className="bg-white">
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
