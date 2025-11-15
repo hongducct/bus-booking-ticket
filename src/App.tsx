@@ -17,7 +17,7 @@ import { AdminBookingsPage } from './components/AdminBookingsPage';
 import { AdminTripsPage } from './components/AdminTripsPage';
 import { AdminUsersPage } from './components/AdminUsersPage';
 import { UserMenu } from './components/UserMenu';
-import { ThemeSwitcher } from './components/ThemeSwitcher';
+// import { ThemeSwitcher } from './components/ThemeSwitcher';
 import { LanguageSwitcher } from './components/LanguageSwitcher';
 import { LiveChatSupport } from './components/LiveChatSupport';
 import { Toaster } from './components/ui/sonner';
@@ -174,9 +174,9 @@ function AppContent() {
         <LiveChatSupport />
 
         {/* Floating Language & Theme Switcher */}
-        <div className="fixed right-4 md:right-6 z-50 flex flex-col gap-3" style={{ top: '100px' }}>
+        <div className="fixed right-4 md:right-6 z-50 flex flex-col gap-3" style={{ top: '80px' }}>
           <LanguageSwitcher />
-          <ThemeSwitcher />
+          {/* <ThemeSwitcher /> */}
         </div>
 
         {/* Footer */}

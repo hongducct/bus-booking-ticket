@@ -235,7 +235,7 @@ export function AdminBookingsPage() {
                         {booking.trip.from} → {booking.trip.to}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {booking.trip.departureTime} - {booking.trip.company}
+                        {booking.trip.departureTime} - MaiLinh Transit
                       </p>
                     </div>
                   )}

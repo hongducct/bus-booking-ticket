@@ -148,7 +148,7 @@ export function OrderManagementPage() {
           <>
             <div className="flex items-center gap-2 text-gray-700">
               <Ticket className="w-4 h-4 text-blue-600" />
-              <span>{order.trip.company || 'Nhà xe'}</span>
+              <span>MaiLinh Transit</span>
             </div>
             <div className="flex items-center gap-2 text-gray-700">
               <MapPin className="w-4 h-4 text-orange-500" />

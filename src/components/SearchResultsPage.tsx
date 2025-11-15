@@ -8,7 +8,6 @@ import { Checkbox } from './ui/checkbox';
 import { 
   MapPin, 
   Clock, 
-  Star, 
   Users, 
   ArrowRight, 
   SlidersHorizontal,
@@ -22,8 +21,6 @@ import { toast } from 'sonner';
 
 interface Trip {
   id: string;
-  company: string;
-  companyRating: number;
   from: string;
   to: string;
   departureTime: string;
@@ -48,7 +45,7 @@ export function SearchResultsPage() {
   const [priceRange, setPriceRange] = useState([200000, 300000]);
   const [selectedBusTypes, setSelectedBusTypes] = useState<string[]>([]);
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<'price' | 'time' | 'rating'>('time');
+  const [sortBy, setSortBy] = useState<'price' | 'time'>('time');
 
   const from = searchParams.get('from') || 'Hồ Chí Minh';
   const to = searchParams.get('to') || 'Đà Lạt';
@@ -183,7 +180,6 @@ export function SearchResultsPage() {
             >
               <option value="time">Giờ đi sớm nhất</option>
               <option value="price">Giá thấp nhất</option>
-              <option value="rating">Đánh giá cao nhất</option>
             </select>
           </div>
 
@@ -274,7 +270,6 @@ export function SearchResultsPage() {
                   >
                     <option value="time">Giờ đi sớm nhất</option>
                     <option value="price">Giá thấp nhất</option>
-                    <option value="rating">Đánh giá cao nhất</option>
                   </select>
                 </div>
 
@@ -354,11 +349,7 @@ export function SearchResultsPage() {
                 <div className="flex-1 space-y-4">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="text-xl mb-1">{trip.company}</h3>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                        <span>{trip.companyRating}</span>
-                        <span className="mx-2">•</span>
+                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
                         <Badge variant="secondary" className="flex items-center gap-1">
                           {getBusTypeIcon(trip.busType)}
                           {getBusTypeLabel(trip.busType)}

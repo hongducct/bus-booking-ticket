@@ -28,8 +28,6 @@ function formatDuration(minutes: number): string {
 export function mapTripFromAPI(apiTrip: any) {
   return {
     id: apiTrip.id,
-    company: apiTrip.company?.name || '',
-    companyRating: parseFloat(apiTrip.company?.rating || 0),
     from: apiTrip.fromStation?.name || '',
     to: apiTrip.toStation?.name || '',
     departureTime: apiTrip.departureTime,
@@ -53,7 +51,7 @@ export async function searchTrips(params: {
   maxPrice?: number;
   busType?: string;
   timeSlot?: string;
-  sortBy?: 'price' | 'time' | 'rating';
+  sortBy?: 'price' | 'time';
 }) {
   const queryParams = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
@@ -119,12 +117,12 @@ export async function releaseSeats(seatIds: string[]) {
 // Create booking
 export async function createBooking(bookingData: {
   tripId: string;
+  seats: Array<{ seatId: string }>;
   customerName: string;
   customerPhone: string;
   customerEmail?: string;
-  pickupPoint?: string;
-  dropoffPoint?: string;
-  seats: { seatId: string }[];
+  pickupPointId?: string;
+  dropoffPointId?: string;
 }) {
   const response = await fetch(`${API_BASE_URL}/bookings`, {
     method: 'POST',
@@ -166,8 +164,8 @@ export async function getBookings() {
         name: booking.customerName || '',
         phone: booking.customerPhone || '',
         email: booking.customerEmail || '',
-        pickupPoint: booking.pickupPoint || '',
-        dropoffPoint: booking.dropoffPoint || '',
+        pickupPoint: booking.pickupPoint?.name || '',
+        dropoffPoint: booking.dropoffPoint?.name || '',
       },
       totalPrice: parseFloat(booking.totalPrice || 0),
       paymentMethod: booking.paymentMethod || 'cash',
@@ -204,8 +202,8 @@ export async function searchBooking(query: string) {
       name: data.customerName || '',
       phone: data.customerPhone || '',
       email: data.customerEmail || '',
-      pickupPoint: data.pickupPoint || '',
-      dropoffPoint: data.dropoffPoint || '',
+      pickupPoint: data.pickupPoint?.name || '',
+      dropoffPoint: data.dropoffPoint?.name || '',
     },
     totalPrice: parseFloat(data.totalPrice || 0),
     paymentMethod: data.paymentMethod || 'cash',
@@ -227,6 +225,39 @@ export async function cancelBooking(bookingId: string) {
 }
 
 // Get stations
+// Get station points (pickup/dropoff points) for a station
+export async function getStationPoints(stationId: string, type?: 'pickup' | 'dropoff' | 'both') {
+  const url = new URL(`${API_BASE_URL}/stations/${stationId}/points`);
+  if (type) {
+    url.searchParams.append('type', type);
+  }
+  
+  const response = await fetch(url.toString(), {
+    method: 'GET',
+    headers: getHeaders(false),
+  });
+
+  if (!response.ok) {
+    throw new Error('Không thể tải danh sách điểm đón/trả');
+  }
+
+  return response.json();
+}
+
+// Get trip points (pickup and dropoff points for a trip)
+export async function getTripPoints(tripId: string) {
+  const response = await fetch(`${API_BASE_URL}/trips/${tripId}/points`, {
+    method: 'GET',
+    headers: getHeaders(false),
+  });
+
+  if (!response.ok) {
+    throw new Error('Không thể tải danh sách điểm đón/trả cho chuyến xe');
+  }
+
+  return response.json();
+}
+
 export async function getStations() {
   const response = await fetch(`${API_BASE_URL}/stations`);
   if (!response.ok) {

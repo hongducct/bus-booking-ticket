@@ -5,8 +5,9 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { ArrowLeft, Clock, MapPin, Phone, Mail, User, AlertCircle, Loader2 } from 'lucide-react';
-import { getTrip, getTripSeats } from '../utils/api';
+import { getTrip, getTripSeats, getTripPoints } from '../utils/api';
 import { toast } from 'sonner';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 interface Seat {
   id: string;
@@ -25,9 +26,11 @@ export function SeatSelectionPage() {
     phone: '',
     name: '',
     email: '',
-    pickupPoint: '',
-    dropoffPoint: '',
+    pickupPointId: '',
+    dropoffPointId: '',
   });
+  const [pickupPoints, setPickupPoints] = useState<any[]>([]);
+  const [dropoffPoints, setDropoffPoints] = useState<any[]>([]);
   const [holdingTimer, setHoldingTimer] = useState<number | null>(null);
   const [trip, setTrip] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -55,15 +58,27 @@ export function SeatSelectionPage() {
         
         setTrip({
           id: tripData.id,
-          company: tripData.company || 'Nhà xe',
           from: tripData.from || '',
           to: tripData.to || '',
+          fromStationId: tripData.fromStation?.id || tripData.fromStationId,
+          toStationId: tripData.toStation?.id || tripData.toStationId,
           departureTime: tripData.departureTime && tripData.arrivalTime
             ? `${tripData.departureTime} - ${tripData.arrivalTime}`
             : tripData.departureTime || '',
           date: new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
           price: price,
         });
+        
+        // Load pickup and dropoff points for this trip
+        try {
+          const pointsData = await getTripPoints(tripId);
+          setPickupPoints(pointsData.pickupPoints || []);
+          setDropoffPoints(pointsData.dropoffPoints || []);
+          console.log('Loaded trip points:', pointsData);
+        } catch (error) {
+          console.error('Error loading trip points:', error);
+          toast.error('Không thể tải danh sách điểm đón/trả');
+        }
         
         if (seatsData && Array.isArray(seatsData)) {
           setSeats(seatsData.map((seat: any) => ({
@@ -157,6 +172,14 @@ export function SeatSelectionPage() {
       toast.error('Vui lòng điền đầy đủ thông tin: Họ tên, Số điện thoại và Email');
       return;
     }
+    if (!customerInfo.pickupPointId) {
+      toast.error('Vui lòng chọn điểm đón');
+      return;
+    }
+    if (!customerInfo.dropoffPointId) {
+      toast.error('Vui lòng chọn điểm trả');
+      return;
+    }
 
     if (!trip) return;
 
@@ -167,6 +190,8 @@ export function SeatSelectionPage() {
         seats: selectedSeats,
         customerInfo,
         totalPrice,
+        pickupPoints,
+        dropoffPoints,
       },
     });
   };
@@ -208,7 +233,7 @@ export function SeatSelectionPage() {
           <Card className="p-6 bg-gradient-to-r from-blue-50 to-orange-50 border-0">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-2xl mb-2">{trip.company}</h2>
+                <h2 className="text-2xl mb-2">MaiLinh Transit</h2>
                 <div className="flex items-center gap-4 text-sm text-gray-600">
                   <div className="flex items-center gap-1">
                     <Clock className="w-4 h-4" />
@@ -482,35 +507,51 @@ export function SeatSelectionPage() {
                 <div className="space-y-2">
                   <label className="text-sm text-gray-600 flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-blue-600" />
-                    Điểm đi
+                    Điểm đón *
                   </label>
-                  <select
-                    value={customerInfo.pickupPoint}
-                    onChange={(e) => setCustomerInfo({ ...customerInfo, pickupPoint: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  <Select
+                    value={customerInfo.pickupPointId || undefined}
+                    onValueChange={(value) => setCustomerInfo({ ...customerInfo, pickupPointId: value })}
+                    disabled={pickupPoints.length === 0}
                   >
-                    <option value="">Chọn điểm đón</option>
-                    <option>Bến xe Miền Đông</option>
-                    <option>Bến xe Miền Tây</option>
-                    <option>Văn phòng công ty</option>
-                  </select>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={pickupPoints.length === 0 ? "Đang tải..." : "Chọn điểm đón"} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white">
+                      {pickupPoints.length > 0 ? (
+                        pickupPoints.map((point) => (
+                          <SelectItem key={point.id} value={point.id}>
+                            {point.name} {point.address ? `- ${point.address}` : ''}
+                          </SelectItem>
+                        ))
+                      ) : null}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-sm text-gray-600 flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-orange-500" />
-                    Điểm đến
+                    Điểm trả *
                   </label>
-                  <select
-                    value={customerInfo.dropoffPoint}
-                    onChange={(e) => setCustomerInfo({ ...customerInfo, dropoffPoint: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  <Select
+                    value={customerInfo.dropoffPointId || undefined}
+                    onValueChange={(value) => setCustomerInfo({ ...customerInfo, dropoffPointId: value })}
+                    disabled={dropoffPoints.length === 0}
                   >
-                    <option value="">Chọn điểm trả</option>
-                    <option>Bến xe Đà Lạt</option>
-                    <option>Trung tâm thành phố</option>
-                    <option>Khách sạn</option>
-                  </select>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={dropoffPoints.length === 0 ? "Đang tải..." : "Chọn điểm trả"} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white">
+                      {dropoffPoints.length > 0 ? (
+                        dropoffPoints.map((point) => (
+                          <SelectItem key={point.id} value={point.id}>
+                            {point.name} {point.address ? `- ${point.address}` : ''}
+                          </SelectItem>
+                        ))
+                      ) : null}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>
@@ -537,7 +578,7 @@ export function SeatSelectionPage() {
             <div className="mt-6 space-y-3">
               <Button
                 onClick={handleContinue}
-                disabled={selectedSeats.length === 0 || !customerInfo.phone || !customerInfo.name || !customerInfo.email}
+                disabled={selectedSeats.length === 0 || !customerInfo.phone || !customerInfo.name || !customerInfo.email || !customerInfo.pickupPointId || !customerInfo.dropoffPointId}
                 className="w-full bg-gradient-to-r from-blue-600 to-orange-500 hover:from-blue-700 hover:to-orange-600 text-white py-6"
               >
                 Tiếp tục
