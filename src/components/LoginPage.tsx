@@ -57,7 +57,8 @@ export function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="user@example.com"
-                className="pl-10"
+                className="pl-20"
+                style={{ paddingLeft: '30px' }}
               />
             </div>
           </div>
@@ -76,6 +77,7 @@ export function LoginPage() {
                 required
                 placeholder="••••••••"
                 className="pl-10"
+                style={{ paddingLeft: '30px' }}
               />
             </div>
           </div>
