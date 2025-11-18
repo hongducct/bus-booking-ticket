@@ -60,6 +60,7 @@ export function RegisterPage() {
                 required
                 placeholder="user@example.com"
                 className="pl-10"
+                style={{ paddingLeft: '30px' }}
               />
             </div>
           </div>
@@ -79,6 +80,7 @@ export function RegisterPage() {
                 minLength={6}
                 placeholder="••••••••"
                 className="pl-10"
+                style={{ paddingLeft: '30px' }}
               />
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400">Tối thiểu 6 ký tự</p>
@@ -97,6 +99,7 @@ export function RegisterPage() {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Nguyễn Văn A"
                 className="pl-10"
+                style={{ paddingLeft: '30px' }}
               />
             </div>
           </div>
@@ -114,6 +117,7 @@ export function RegisterPage() {
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="0123456789"
                 className="pl-10"
+                style={{ paddingLeft: '30px' }}
               />
             </div>
           </div>
